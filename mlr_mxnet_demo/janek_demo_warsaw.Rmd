@@ -1,0 +1,247 @@
+---
+title: "Deep learning in mlr"
+author: "Jannek Thomas"
+date: "13. 06 2018"
+output:
+  ioslides_presentation:
+    css: txt_slides.css
+    includes:
+      in_header: header.html
+    theme: united
+    toc: yes
+    widescreen: no
+  beamer_presentation: default
+  slidy_presentation: default
+bibliography: lit.bibtex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Installation
+
+* clone branch `mxnet` from [https://github.com/mlr-org/mlr](https://github.com/mlr-org/mlr)
+* build the package to `tar.gz` file by navigating in repo parent and running `R CMD build mlr` in terminal
+* install the package in R via `ìnstall.packages("<path to pkg>/mlr_2.12.tar.gz", repo = NULL, type = "source")` and verify via `sessionInfo()`
+* reinstall up to date mlr version
+* source("raw github learner code")
+* for mxnet installation follow instructions on [the mxnet page](https://mxnet.incubator.apache.org/install/index.html)
+* packages required for this demo are __mxnet, mlr, mlrMBO, mlbench__ and __farff__
+
+
+## Why dl in mlr?
+
+* __Tuning, resampling, benchmarking__
+* deep neural nets consist of a magnitude of different hyperparameters
+* finding the optimal parameter setting is critical for a strong performance
+* training and testing of neural nets is very time consuming
+* sophisticated methods required to tune neural nets efficiently given budget constraints
+* `mlr` with `mlrMBO` offers a reliable and efficient environment for tuning of `mxnets`
+
+## What are the pitfalls of using mlr for dl?
+
+* no stage loading
+* ...
+
+
+## Data bye bye 
+
+
+* __only fashion mnist for everything__
+* __Sonar:__
+    * 100 train and 50 balanced test data
+    * 60 numeric features 
+    * Binary classification task
+* __Iris:__ 
+    * 100 train and 50 balanced test data
+    * 4 numeric features 
+    * 3-class classification task
+* __MNIST:__
+    * ...
+
+```{R, echo = FALSE, warning=FALSE, cache=TRUE, message=FALSE}
+library(dplyr)
+data(Sonar, package = "mlbench")
+Sonar[,61] = as.numeric(Sonar[,61]) - 1
+train.ind = c(1:50, 100:150)
+train.x = data.matrix(Sonar[train.ind, 1:60])
+train.y = Sonar[train.ind, 61]
+test.x = data.matrix(Sonar[-train.ind, 1:60])
+test.y = Sonar[-train.ind, 61]
+```
+
+## Architecture building and training with mxnet
+
+__no mxnet intro, only tuning/ running in mlr__
+
+Build simple multilayer perceptron (vanilla feed forward net) for classification of the sonar data:
+
+```{r, echo = TRUE, out.width="100%", fig.align='center', fig.cap="", warning=FALSE, message=FALSE}
+# load libraries
+library(mlr)
+library(mxnet)
+library(mlrMBO)
+
+# set imperative model architecture and also train it
+mod.imp = mx.mlp(data = train.x, label = train.y, 
+    hidden_node = c(5, 5), out_node = 2, out_activation = "softmax",
+    num.round = 3, array.batch.size = 15, learning.rate = 0.07, optimizer = "sgd",
+    eval.metric = mx.metric.accuracy)
+
+# predict class of the first three test obsverations after 3 epochs of training
+predict(mod.imp, test.x)[2, 1:3]
+```
+
+
+## examples
+
+1. self set architecture on fmnist
+
+2. get resnet symbol, fine tune some of the params
+
+3. tune those two models
+
+3. outlook: continuation of training
+
+## resnet in mlr
+
+* `source("https://raw.githubusercontent.com/apache/incubator-mxnet/master/example/image-classification/symbol_resnet-28-small.R")`
+* `mx.thing = get_symbol()`
+
+## Architecture building and training with mxnet
+
+```{r, echo = FALSE, out.width="100%", fig.align='center', fig.cap="Illustration of the simple mxnet's architecture", warning=FALSE, message=FALSE}
+graph.viz(symbol = mod.imp$symbol, direction = "LR", graph.height.px = 150)
+```
+
+## Mxnet in mlr
+
+* self set cnn 
+* mlr Syntax:
+    * __task:__ combination of data, label and error measure for the given task
+    * __learner:__ object that combines an algorithm with a task
+* setup of our previous model in mlr:
+```{r, echo = TRUE, out.width="100%", fig.align='center', fig.cap="Illustration of the simple mxnet's architecture", warning=FALSE, message=FALSE}
+lrn = makeLearner("classif.mxff", layers = 2, num.layer1 = 5, num.layer2 = 5, 
+    act1 = "tanh", act2 = "tanh", act.out = "softmax") 
+```
+
+* hyperparameter setting of the learner:
+```{r, echo = FALSE, out.width="100%", fig.align='center', fig.cap="Illustration of the simple mxnet's architecture", warning=FALSE, message=FALSE}
+hypers = getHyperPars(lrn)
+print(as.data.frame(hypers[-c(2,3)]))
+#knitr::kable(as.data.frame(hypers[-c(2,3)]))
+#kable(dt) %>%
+#    kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+
+## Tuning mxnets in mlr with MBO
+
+* setup the learner and the task
+```{r, echo = TRUE, out.width="100%", fig.align='center', fig.cap="Illustration of the simple mxnet's architecture", warning=FALSE, message=FALSE, cache = FALSE}
+task = mlr::iris.task
+lrn = makeLearner("classif.mxff", eval.metric = mx.metric.accuracy, num.round = 10)
+```
+
+* define the parameter space
+
+```{r, echo = TRUE, out.width="100%", fig.align='center', fig.cap="Illustration of the simple mxnet's architecture", warning=FALSE, message=FALSE, cache = FALSE}
+par.set = makeParamSet(
+  makeIntegerParam(id = "layers", lower = 1L, upper = 2L),
+  makeIntegerParam(id = "num.layer1", lower = 5L, upper = 10L),
+  makeIntegerParam(id = "num.layer2", lower = 5L, upper = 10L,
+  # only tune neurons in layer2 if layer1 exists
+    requires = quote(layers > 1)),
+  makeDiscreteParam(id = "act1", c("tanh", "relu", "sigmoid")),
+  makeDiscreteParam(id = "act2", c("tanh", "relu", "sigmoid"),
+  # only tune activation function in layer2 if layer1 exists
+    requires = quote(layers > 1)),
+  makeNumericParam(id = "learning.rate", lower = 0.05, upper = 0.3)
+)
+```
+
+## Tuning mxnets in mlr with MBO
+
+* define MBO as search algorithm using mlrMBO.
+* possible budget constraints:
+    * __iters:__ number of sequential optimization steps 
+    * __time.budget:__ time after which the search stops [sec]
+    * __target.fun.value:__ search stops when this performance-value is reached 
+    * __...__
+
+
+```{r, echo = TRUE, out.width="100%", fig.align='center', fig.cap="Illustration of the simple mxnet's architecture", warning=FALSE, message=FALSE, cache = FALSE}
+ctrl = makeMBOControl()
+# ctrl = setMBOControlTermination(ctrl, iters = 5)
+ctrl = setMBOControlTermination(ctrl, time.budget = 60)
+tune.ctrl = makeTuneControlMBO(mbo.control = ctrl)
+```
+
+
+* tune with 3-fold CV
+
+```{r, echo = TRUE, out.width="100%", fig.align='center', fig.cap="Illustration of the simple mxnet's architecture", warning=FALSE, message=FALSE, cache = FALSE}
+res.mbo = tuneParams(learner = lrn, task = task, resampling = cv3, par.set = par.set,
+  control = tune.ctrl, show.info = FALSE)
+```
+
+## Tuning mxnets in mlr with MBO
+
+* inspect resulting parameter set and performance
+
+```{r, echo = TRUE, out.width="100%", fig.align='center', fig.cap="Illustration of the simple mxnet's architecture", warning=FALSE, message=FALSE, cache = FALSE}
+print(as.data.frame(c(res.mbo$x, res.mbo$y)))
+```
+
+## Alternative tuning methods in mlr
+
+* macht keinen sinn ohne benchmark, cv etc
+* randomly tune with 10 evaluations
+
+```{r, echo = TRUE, out.width="100%", fig.align='center', fig.cap="Illustration of the simple mxnet's architecture", warning=FALSE, message=FALSE, cache = FALSE}
+rand.ctrl = makeTuneControlRandom(budget = 20L)
+res.random = tuneParams(learner = lrn, task = task, resampling = cv3, par.set = par.set,
+  control = rand.ctrl, show.info = FALSE)
+print(as.data.frame(c(res.random$x, res.random$y)))
+```
+
+* tune with iterated racing for max 20 function evaluations
+
+```{r, echo = TRUE, eval = FALSE, out.width="100%", fig.align='center', fig.cap="Illustration of the simple mxnet's architecture", warning=FALSE, message=FALSE, cache = FALSE}
+irace.ctrl = makeTuneControlGenSA(n.instances = 10L, budget = 20L)
+res.irace = tuneParams(learner = lrn, task = task, resampling = cv3, par.set = par.set,
+  control = irace.ctrl, show.info = FALSE)
+print(as.data.frame(c(res.irace$x, res.irace$y)))
+```
+  
+## Deploy tuning results
+
+```{r, echo = TRUE, eval = TRUE, out.width="100%", fig.align='center', fig.cap="Illustration of the simple mxnet's architecture", warning=FALSE, message=FALSE, cache = FALSE}
+# assign tuned parameter set
+lrn.tuned = setHyperPars(makeLearner(cl = "classif.mxff"), par.vals = res.mbo$x)
+# split
+train.ids = sample(1:task$task.desc$size, 100)
+test.ids = which(!(1:task$task.desc$size %in% train.ids))
+# train final model 
+mod.tuned = mlr::train(learner = lrn.tuned, task = task, subset = train.ids)
+# predict and evaluate performance
+preds = predict(mod.tuned, task = iris.task, subset = test.ids)
+performance(pred = preds, measures = mmce)
+```
+
+## Discussion
+
+* conv net example with MNIST? Timing? Prio2 imho
+* deployment
+* easy way to get model symbol from mlr object for graph.viz? getlearnermodel done
+* imperative vs. symbolic programming with mxnet: include? Prio1 imho
+* installation? Source code for learner only from git
+
+
+
+
+
+
