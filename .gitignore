@@ -1,4 +1,4 @@
 /data/
-*_cache
+*_cache/
 *.html
 /images
