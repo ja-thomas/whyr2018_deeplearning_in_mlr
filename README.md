@@ -1,2 +1,1 @@
-# dl talk janek @ useR warsaw
-repo for janeks talk at usR in warsaw june 2018
+# Deep Learning in mlr @ WhyR 2018

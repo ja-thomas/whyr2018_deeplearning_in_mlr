@@ -1,0 +1,16 @@
+---
+title: "Deep learning in mlr"
+author: "Janek Thomas"
+date: "13.06.2018"
+output:
+  ioslides_presentation:
+    css: txt_slides.css
+    includes:
+      in_header: header.html
+    theme: united
+    toc: yes
+    widescreen: no
+  beamer_presentation: default
+  slidy_presentation: default
+bibliography: lit.bibtex
+---

@@ -1,0 +1,176 @@
+
+/* Add own title image (background) */
+slides > slide.title-slide {
+	/*background-image: url(images/background_science_subslides_old.png) !important;*/
+	background-image: url(images/main.png) !important;
+	background-size: 100% 100% !important;
+
+}
+
+/* Change color of the title page title */
+.title-slide hgroup h1 {
+	/*color: #a7a7a7;*/
+	color: #ffffff;
+}
+
+/* Set same color for the subtitle (Author) */
+.title-slide hgroup p {
+	font-size: 20px;
+	color: #a7a7a7;
+	line-height: 1.3;
+	margin-top: 4em;
+}
+
+/* Change main color for the headers in the slides: */
+h2 {
+	color: #40465b;
+	font-size: 30px;
+}
+
+/* Change color for the subtitles */
+.segue h2 {
+	color: #ffffff;
+	font-size: 60px;
+}
+
+/* This creates a background image for the subtitle slides
+   Very hacky and ugl!): */
+/*
+slides > slide.dark {
+    background-image: url(images/background_science.png) !important;
+	background-size: 100% 100% !important;
+	opacity: 0.5 !important;
+}
+
+slides > slide.backdrop {
+  background-image: url(images/texture/texture_bottom.png) !important;
+  background-position: 0 100%;
+  background-repeat: repeat-x;
+}
+
+slides > slide:not(.nobackground):after {
+  color: #ffffff;
+}
+*/
+
+/* Change background of the slides: */
+body slides > slide {
+    background: rgb(40, 40, 40);
+}
+
+/* Change color of the code output
+This actually sets the style of the output from ``` ... ```
+*/
+pre {
+	font-family: 'Source Code Pro', 'Courier New', monospace;
+	font-size: 15px;
+	color: rgb(230, 10, 230);
+	line-height: 28px;
+	padding: 10px 0 10px 60px;
+	letter-spacing: -1px;
+	margin-bottom: 20px;
+	width: 106%;
+	left: -60px;
+	position: relative;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Background of the code snippets
+   Don't try to change that! The colors of the snippets are pre built. To change the
+   one color means that the other ones also have to be changed!
+*/
+.prettyprint {
+	background-color: #e6e6e6;
+}
+
+/* background image of the h2 extra slide introduced in front of the following content */
+slides > slide.dark {
+ 	/*background-image: url(images/beige_back.png) !important;
+ 	background-image: url(images/background_science_old.png) !important; */
+ 	background-image: url(images/chapter2.png) !important;
+
+	background-size: 100% 100% !important;
+}
+
+/* Background image of the
+
+/* Background color of the slides */
+
+/* Global changes to the slides */
+
+/* REGULAR SLIDES */
+
+body slides > slide {
+  /*background-image: url(images/beige_back.png) !important;*/
+ 	background-image: url(images/content2.png) !important;
+	background-size: 100% 100% !important;
+	font-size: 20px;
+	/*color: rgb(255, 255, 255);*/
+	color: rgb(64,70,91);
+}
+
+/* Change small code chunks color */
+code {
+    font-size: 20px;
+    font-family: "Source Code Pro","Courier New",monospace;
+    color: rgb(64,70,91);
+	/*background-color: rgb(175,238,238);*/
+	background-color: transparent;
+}
+
+/* Define a column environment to do something like an itemization with font awesome */
+
+.cols{
+  max-width: 870px
+}
+
+.box1{
+  width: 145px;
+  display: table-cell;
+  vertical-align: middle;
+ }
+
+.box2{
+  width: 725px;
+  display: table-cell;
+  vertical-align: top;
+}
+
+
+/* create random div */
+.ownDiv {
+	font-size: 40px;
+  	color: rgb(0, 0, 0);
+  	text-align: center;
+}
+
+
+/* Disable transition */
+slides > slide {
+    -webkit-transition: all 0s ease-in-out;
+    -moz-transition: all 0.4s ease-in-out;
+    -o-transition: all 0.4s ease-in-out;
+    transition: all 0.0s ease-in-out;
+}
+
+/* Set background transparent for shiny!
+   1. Set background of the style.css of the shiny app to transparent (line 30)
+   2. Set the background of iframe to transparent (below)
+*/
+iframe {
+	width: 100%;
+	height: 510px;
+	background: transparent;
+	border: 0px solid #e6e6e6;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+/* Advanced code highlighting, sometimes the ordinary pre fails */
+.qt pre, .qt code {
+    color: rgb(200, 200, 200);
+	font-family: 'Source Code Pro', 'Courier New', monospace !important;
+}
