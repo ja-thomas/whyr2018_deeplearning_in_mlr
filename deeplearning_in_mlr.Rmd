@@ -22,7 +22,7 @@ library(reshape2)
 library(ggplot2)
 library(mlr)
 library(mlrMBO)
-library(mxnet)
+#library(mxnet)
 #source("data/read_data.R")
 source("https://raw.githubusercontent.com/mlr-org/mlr-extralearner/master/R/RLearner_classif_mxff.R")
 ```
@@ -38,7 +38,7 @@ __Why?__
 
 * Methods for tuning, resampling, benchmarking and visualization
 * Easy comparison with a large number of other ML algorithms
-* Well integrated into other packages, e.g., __mlrMBO__
+* __mlr__ is well integrated into other packages, .e.g, __OpenML__ or __mlrMBO__
 
 <br><br>
 
