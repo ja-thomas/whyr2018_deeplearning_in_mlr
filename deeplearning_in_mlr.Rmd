@@ -38,7 +38,7 @@ __Why?__
 
 * Methods for tuning, resampling, benchmarking and visualization
 * Easy comparison with a large number of other ML algorithms
-* __mlr__ is well integrated into other packages, .e.g, __OpenML__ or __mlrMBO__
+* __mlr__ is well integrated into other packages, .e.g, __OpenML__, __mlrMBO__ or __hyperbandr__
 
 <br><br>
 
@@ -219,7 +219,7 @@ resnet.pretrained = makeLearner("classif.mxff",
 ```
 
 
-## Hyperparamter Tuning
+## Hyperparameter Tuning
 
 Use __mlr__ tuning methods:
 
@@ -263,6 +263,16 @@ result = tuneParams(learner = lenet.custom, task = task, resampling = hout,
   par.set = par.set, control = tune.ctrl, show.info = TRUE)
 ```
 
+## Hyperparameter Tuning II
+
+Implementation of the hyperband algorithm in __R__: __hyperbandr__
+
+- https://github.com/ja-thomas/hyperbandr
+
+Can be easily used with `classif|regr.mxff` (-> see README on github)
+
+
+<img src="images/hyperVis.png" width="600px"/>
 
 ## Thank You!
 
